@@ -1,0 +1,99 @@
+			+-------------------------+
+			|        CS 318           |
+			| PROJECT 0: Getting Real |
+			|     DESIGN DOCUMENT     |
+			+-------------------------+
+				   
+---- AUTHOR ----
+
+>> Fill in your name and email address.
+
+FirstName LastName <email@domain.example>
+
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+>> Please cite any offline or online sources you consulted while
+>> preparing your submission, other than the Pintos documentation, course
+>> text, lecture notes, and course staff.
+
+			     Booting Pintos
+			     ==============
+
+---- QUESTIONS ---- 
+>> Put the screenshots of Pintos running in src/p0.
+>> A1: Is there any particular issue that you would like us to know?
+
+			     Debugging
+			     =========
+
+---- QUESTIONS: BIOS ---- 
+>> B1: What is the first instruction that gets executed?
+		ljmp   $0xf000,$000e05b
+
+>> B2: At which physical address is this instruction located?
+		0xffff0
+
+>> B3: Can you guess why the first instruction is like this?
+		When the CPU boots up, it is in real mode and starts executing at address 0xFFFF0. 
+		But the ROM code at 0xFFFF0 is usually very small, so it performs an ljmp to jump to the full BIOS code area.
+
+>> B4: What are the next three instructions?
+	[f000:e05b]    0xfe05b:	cmpw   $0xffc8,%cs:(%esi)
+	[f000:e062]    0xfe062:	jne    0xd241d416
+	[f000:e066]    0xfe066:	xor    %edx,%edx
+
+---- QUESTIONS: BOOTLOADER ---- 
+>> B5: How does the bootloader read disk sectors? In particular, what BIOS interrupt
+is used?
+	Pintos Bootloader reads disk data through INT 0x13, which is the disk I/O interrupt provided by BIOS and can read data from disk.
+
+>> B6: How does the bootloader decides whether it successfully finds the Pintos kernel?
+	CF == 0. First use the info registers command to check the eflags in the output. 
+	My eflags is 0x246 [ PF ZF IF ], which is converted to binary: 0b 0010 0100 0110. 
+	At this time, CF is 0 and is not set, so it is judged that the disk read is successful.
+
+>> B7: What happens when the bootloader could not find the Pintos kernel?
+	Print error message.
+	CPU executes ‘hlt’ instruction and the system hangs.
+
+>> B8: At what point and how exactly does the bootloader transfer control to the Pintos kernel?
+	When the bootloader successfully reads the Pintos kernel into memory and verifies its validity, it jumps to the kernel entry.
+	The bootloader loads the Pintos kernel to 0x20000.
+	Jumps to 0x20000 and executes the kernel code.
+
+---- QUESTIONS: KERNEL ---- 
+>> B9: At the entry of pintos_init(), what is the value of expression 
+init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+
+>> B10: When palloc_get_page() is called for the first time,
+
+>> B10.1 what does the call stack look like?
+
+>> B10.2 what is the return value in hexadecimal format?
+
+>> B10.3 what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+
+>> B11: When palloc_get_page() is called for the third time,
+
+>> B11.1 what does the call stack look like?
+
+>> B11.2 what is the return value in hexadecimal format?
+
+>> B11.3 what is the value of expression init_page_dir[pd_no(ptov(0))] in hexadecimal format?
+
+			     Kernel Monitor
+			     ==============
+
+---- DATA STRUCTURES ----
+
+>> C1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+---- ALGORITHMS ----
+>> C2: Explain how you read and write to the console for the kernel monitor.
+
+>> C3: Any additional enhancement you implement?
