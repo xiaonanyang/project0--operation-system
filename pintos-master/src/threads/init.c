@@ -431,3 +431,47 @@ locate_block_device (enum block_type role, const char *name)
     }
 }
 #endif
+
+#include "devices/input.h"
+#include "lib/kernel/console.h"
+#include "lib/stdio.h"
+#include "threads/thread.h"
+#include <string.h>
+
+#define CMD_LEN 64  
+
+void kernel_monitor(void) {
+    char cmd[CMD_LEN];  
+    int pos = 0; 
+
+    while (true) {
+        printf("CS318> ");
+        pos = 0;  
+
+        while (pos < CMD_LEN - 1) {
+            char c = input_getc(); 
+
+            if (c == '\r' ) {  //enter
+                cmd[pos] = '\0';  
+                break;
+                //resource https://stackoverflow.com/questions/14261791/what-is-the-character-code-for-enter
+            } else if (c == '\b' && pos > 0) {  //Backspace
+                printf("\b \b"); 
+                pos--;
+            } else if (c >= 32 && c <= 126) {  //Display the typed content
+                putchar(c);  
+                cmd[pos++] = c;
+            }
+        }
+        printf("\n");  
+
+        if (strcmp(cmd, "whoami") == 0) {
+            printf("your name is xiaonan\n");
+        } else if (strcmp(cmd, "exit") == 0) {
+            printf("exit...\n");
+            return;
+        } else {
+            printf("invalid command\n");
+        }
+    }
+}

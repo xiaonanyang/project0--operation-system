@@ -31,19 +31,18 @@ FirstName LastName <email@domain.example>
 
 ---- QUESTIONS: BIOS ---- 
 >> B1: What is the first instruction that gets executed?
-		ljmp   $0xf000,$000e05b
+		ljmp   $0xf000,$0xe05b
 
 >> B2: At which physical address is this instruction located?
 		0xffff0
 
 >> B3: Can you guess why the first instruction is like this?
-		When the CPU boots up, it is in real mode and starts executing at address 0xFFFF0. 
-		But the ROM code at 0xFFFF0 is usually very small, so it performs an ljmp to jump to the full BIOS code area.
+		
 
 >> B4: What are the next three instructions?
-	[f000:e05b]    0xfe05b:	cmpw   $0xffc8,%cs:(%esi)
-	[f000:e062]    0xfe062:	jne    0xd241d416
-	[f000:e066]    0xfe066:	xor    %edx,%edx
+	[f000:e05b]    0xfe05b:	xor    %ax,%ax
+	[f000:e05d]    0xfe05d:	out    %al,$0xd
+	[f000:e05f]    0xfe05f:	out    %al,$0xda
 
 ---- QUESTIONS: BOOTLOADER ---- 
 >> B5: How does the bootloader read disk sectors? In particular, what BIOS interrupt
@@ -51,18 +50,13 @@ is used?
 	Pintos Bootloader reads disk data through INT 0x13, which is the disk I/O interrupt provided by BIOS and can read data from disk.
 
 >> B6: How does the bootloader decides whether it successfully finds the Pintos kernel?
-	CF == 0. First use the info registers command to check the eflags in the output. 
-	My eflags is 0x246 [ PF ZF IF ], which is converted to binary: 0b 0010 0100 0110. 
-	At this time, CF is 0 and is not set, so it is judged that the disk read is successful.
+	
 
 >> B7: What happens when the bootloader could not find the Pintos kernel?
-	Print error message.
-	CPU executes ‘hlt’ instruction and the system hangs.
+	
 
 >> B8: At what point and how exactly does the bootloader transfer control to the Pintos kernel?
-	When the bootloader successfully reads the Pintos kernel into memory and verifies its validity, it jumps to the kernel entry.
-	The bootloader loads the Pintos kernel to 0x20000.
-	Jumps to 0x20000 and executes the kernel code.
+	
 
 ---- QUESTIONS: KERNEL ---- 
 >> B9: At the entry of pintos_init(), what is the value of expression 
