@@ -9,6 +9,7 @@
 >> Fill in your name and email address.
 
 FirstName LastName <email@domain.example>
+Xiaonan Yang xyang153@jh.edu
 
 ---- PRELIMINARIES ----
 
@@ -37,7 +38,7 @@ FirstName LastName <email@domain.example>
 		0xffff0
 
 >> B3: Can you guess why the first instruction is like this?
-		
+		Let the CPU start from 0xffff0. Jump to the actual entry of BIOS 0xf000:e05b to start BIOS initialization.
 
 >> B4: What are the next three instructions?
 	[f000:e05b]    0xfe05b:	xor    %ax,%ax
@@ -50,13 +51,15 @@ is used?
 	Pintos Bootloader reads disk data through INT 0x13, which is the disk I/O interrupt provided by BIOS and can read data from disk.
 
 >> B6: How does the bootloader decides whether it successfully finds the Pintos kernel?
-	
+	Read the MBR sector and store it at address 0x20000. Check the MBR signature, which must end with 0xAA55. Then traverse the MBR partition table and check
+	if the partition empty, if the partition type a Pintos kernel partition, and if the partition bootable (0x80).
+	If found, jump to load_kernel
 
 >> B7: What happens when the bootloader could not find the Pintos kernel?
-	
+	Displays "Not found" error message. Calls int 0x18 to let BIOS handle the error
 
 >> B8: At what point and how exactly does the bootloader transfer control to the Pintos kernel?
-	
+	Parse the ELF header and get the entry. Use ljmp to jump to the Pintos kernel and officially enter the kernel startup phase to start the start.S code execution.
 
 ---- QUESTIONS: KERNEL ---- 
 >> B9: At the entry of pintos_init(), what is the value of expression 
@@ -113,8 +116,17 @@ $9 = 0x102027
 >> C1: Copy here the declaration of each new or changed `struct' or
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
+	CMD_LEN 64  					#Stores the length of the command, Max length is 64
+    char cmd[CMD_LEN];  		    #Store a command, length of CMD_LEN
+    int pos = 0; 					#Record the current position of the command, It will be reset to zero after each command is entered
+    char c = input_getc(); 			#Catch a single char
+
+
 
 ---- ALGORITHMS ----
 >> C2: Explain how you read and write to the console for the kernel monitor.
+	Input: input_getc(): Get a character (char) from the keyboard input.
+	Output: printf(): Format and print output to the console
 
 >> C3: Any additional enhancement you implement?
+Implemented the backspace function, using "\b \b". When the user clicks backspace, it can delete a character
